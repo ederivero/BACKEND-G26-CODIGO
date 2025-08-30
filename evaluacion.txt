@@ -1,0 +1,17 @@
+Al finalizar las 12 semanas del modulo de backend tendremos una exposicion del proyecto en el cual tendran que cumplir los siguientes requerimientos para poder aprobar:
+
+- Uso de algun framework de backend (Flask | Django | Express)
+- Usar una bd para guardar la informacion (MySQL, PostgreSQL, MongoDB)
+- Al menos un CRUD para las operaciones
+- Al menos un endpoint con logica (Restar inventario, modificar otros registros,etc)
+- Auth (Autenticacion/Autorizacion)
+- Uso de rutas protegidas
+- Documentacion de la API con Swagger
+- Deploy del proyecto (AWS, Render, GCP, Heroku, etc)
+- Manejo de archivos multimedia en buckets (S3, GCP, etc)
+- Uso del ORM en el backend (SQLAlchemy, Django ORM, Prisma ORM, Mongoose)
+- Uso de Serializadores para validar y retornar la data
+
+El proyecto final puede ser en grupos (maximo de 3 integrantes) o personal
+
+El proyecto final puede llegar hasta 20/20 y adicional a ello tendremos las participaciones en clase que estas ayudaran a la nota final

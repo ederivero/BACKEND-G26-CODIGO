@@ -54,3 +54,80 @@ print(ejercicio_1[-2])
 # Como hago para obtener el valor 8
 # al ser una lista dentro de la lista puedo ingresar a sus posiciones dentro de la sublista 
 print(ejercicio_1[6][1])
+
+
+# ================
+# Tuplas
+# Ordenada PERO no son editables
+
+# suelen ser usadas para las configuraciones de la aplicacion
+meses = ('enero', 'febrero', 'marzo', 'abril')
+
+print(meses[1])
+
+# no se puede ni eliminar ni agregar nueva informacion a la tupla, solamente obtener informacion de la mismo forma que las listas
+# del meses[1]
+# meses.append('mayo')
+
+data = ('Roxana', 'Pedro', [1,2,6,['Juan', 'Aristoteles']])
+
+# Como hago para obtener a Aristoteles?
+print(data[2][3][1])
+
+
+# ================
+# Diccionarios
+# Ordenado PERO por llaves no por indices y es editable
+
+persona = {
+    'nombre':'Eduardo',
+    'ciudad':'Arequipa',
+    'estado':'Peruano',
+    'nacionalidad':'Peruano',
+    'direccion': {
+        'calle':'Los Girasoles',
+        'numero':180,
+        'manzana':3,
+        'lote': None
+    },
+    'hobbies': ['Programar','Estudiar', 'Montar Bici']
+}
+
+print(persona['nombre'])
+
+# Agregar nuevos elementos al diccionario
+persona['idiomas'] = ('Español', 'Ingles', 'Quechua')
+
+# Editar un elemento del diccionario
+persona['estado']= 'Soltero'
+
+# Eliminar un elemento del diccionario
+persona.pop('nacionalidad')
+del persona['estado']
+
+print(persona)
+
+# Se puede obtener las llaves del diccionario
+print(persona.keys())
+print(persona.values())
+
+
+# Obtener la calle en la que vive la persona
+print(persona['direccion']['calle'])
+
+# Obtener los dos ultimos hobbies de la persona
+print(persona['hobbies'][-2:])
+
+
+# ================
+# Set (Cojuntos)
+# Similar al diccionario solo que no es ordenada
+
+planetas = { 'Tierra', 'Marte', 'Jupiter', 'Uranio', 'Venus' }
+
+planetas.add('Pluton')
+print(planetas)
+
+# Tener la informacion almacenada pero solamente para corroborar si esta o no
+print('Neptuno' in planetas)
+print('Tierra' in planetas)

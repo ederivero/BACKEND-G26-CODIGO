@@ -21,7 +21,7 @@
         <td>Si el archivo esta amarillo: Significa que ya se le esta haciendo seguimiento pero ha sido editado</td>
     </tr>
     <tr>
-        <td rowspan=3>git add [ . | -A | <nombre_archivo> ] </td>
+        <td rowspan=3>git add [ . | -A | `<nombre_archivo>` ] </td>
         <td>.      Agregara todos los archivos en este nivel y subniveles al estado de preparacion (staging)</td>
     </tr>
     <tr>
@@ -35,11 +35,11 @@
         <td>Registrara los cambios realizados al repositorio de manera PERMANENTE</td>
     </tr>
     <tr>
-        <td>git remote add origin <URL_REPO></td>
+        <td>git remote add origin `<URL_REPO>`</td>
         <td>Se vincula el repositorio local con el repositorio creado en github, gitlab, etc</td>
     </tr>
     <tr>
-        <td>git push [ -u | --set-upstream ] origin <NOMBRE_RAMA></td>
+        <td>git push [ -u | --set-upstream ] origin `<NOMBRE_RAMA>`</td>
         <td>Si es la primera vez en el repositorio se tiene que vincular la rama local con la rama remota y eso se hace mediante el comando `-u origin` las siguientes veces que querramos subir cambios no es necesario repetir esta opcion</td>
     </tr>    
     <tr>
@@ -51,7 +51,7 @@
         <td>Lista las ramas que tengo en mi repositorio</td>
     </tr>    
     <tr>
-        <td>git branch <NOMBRE_RAMA></td>
+        <td>git branch `<NOMBRE_RAMA>`</td>
         <td>Cambio de rama en mi repositorio</td>
     </tr>
       

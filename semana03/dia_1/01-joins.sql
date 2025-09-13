@@ -35,12 +35,37 @@ FROM profesores AS prof FULL OUTER JOIN direcciones AS dir
 
 
 
--- Mostrar los nombres de los profesores que vivan en Jesus Maria o Lima
+-- 1. Mostrar los nombres de los profesores que vivan en Jesus Maria o Lima
+SELECT DISTINCT prof.nombre FROM profesores AS prof INNER JOIN direcciones dir ON prof.id = dir.profesor_id
+WHERE dir.distrito IN ('Jesus Maria', 'Lima');
 
--- Mostrar los correos de los profesores que vivan en el distrito de Trujillo y la provincia de  Cajabamba
 
--- Contar todos los profesores que tengan direcciones
+SELECT prof.nombre FROM profesores AS prof WHERE prof.id IN (SELECT profesor_id FROM direcciones WHERE distrito IN ('Jesus Maria', 'Lima'));
 
--- Contar todos los profesores que tengan 2 o mas direcciones
+-- En ambas queries ya bien sea usando el join con distinct o la subquery para devolver los id, la query mas optima en este caso es casi la misma entre las dos
 
--- Contar todos los profesores que no tengan direcciones asociadas
+
+-- 2. Mostrar los correos de los profesores que vivan en el distrito de Trujillo y la provincia de  Cajabamba
+SELECT prof.correo FROM profesores AS prof INNER JOIN direcciones dir ON prof.id = dir.profesor_id WHERE dir.distrito = 'Trujillo' AND dir.provincia = 'Cajabamba';
+
+
+-- 3. Contar todos los profesores que tengan direcciones
+ SELECT COUNT(DISTINCT prof.id) 
+ FROM profesores AS prof INNER JOIN direcciones dir ON prof.id = dir.profesor_id;
+
+-- Sin hacer uso del inner join podemos utilizar el count en la columna profesor_id usando la clausula DISTINCT para que solo cuente una sola vez cada profesor_id 
+SELECT COUNT(DISTINCT profesor_id ) FROM direcciones;
+
+-- 4. Contar todos los profesores que tengan 2 o mas direcciones
+SELECT COUNT(*) 
+FROM (
+    SELECT prof.id 
+    FROM profesores AS prof INNER JOIN direcciones AS dir ON prof.id = dir.profesor_id
+    -- En la clausula WHERE no se pueden utilizar funciones de agregacion, cuando queremos usar condicionales con funciones de agregacion tenemos que usar la clausula HAVING
+    GROUP BY prof.id
+    -- El HAVING va despues del group by y si se puede utilizar el having y el where en la misma consulta
+    HAVING COUNT(dir.id) >= 2
+);
+
+
+-- 5. Contar todos los profesores que no tengan direcciones asociadas

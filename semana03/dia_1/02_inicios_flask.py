@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 
 # __name__ > variable de python que sirve para indicar si el archivo que estamos utilizando es el archivo principal de nuestro proyecto, si lo es el valor sera __main__ sino sera el nombre del archivo
 # Flask utiliza el __name__ para crear una sola instancia del servidor en todo el proyecto y evitar tener mas de uno por proyecto
@@ -8,6 +8,16 @@ servidor = Flask(__name__)
 @servidor.route('/')
 def bienvenida():
     return 'Bienvenido a mi API de Flask'
+
+@servidor.route('/crear-usuario',methods =['POST'])
+def crearUsuario():
+    # request es toda la informacion que me puede enviar el cliente 
+    print(request)
+    # El formato que vamos a usar para retornar la informacion sera un formato JSON (en python se usa un diccionario)
+    return {
+        'message':'Usuario creado exitosamente'
+    }
+
 
 # frontend 8080
 # postgres 5432

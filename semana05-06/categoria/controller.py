@@ -4,7 +4,7 @@ from .model import CategoriaModel
 from bd import conexion
 from .serializer import CategoriaSerializer
 from marshmallow.exceptions import ValidationError
-
+from datetime import datetime
 # Ahora registraremos nuestro blueprint (mini aplicacion de categorias)
 categorias_blueprint = Blueprint('categorias_bp', __name__)
 
@@ -19,8 +19,9 @@ class Categorias(Resource):
 
     def get(self):
         # Asi se utiliza el ORM
-        # SELECT * FROM categorias;
-        categorias = conexion.session.query(CategoriaModel).all()
+        # SELECT * FROM categorias WHERE deleted_at IS NULL;
+        categorias = conexion.session.query(CategoriaModel).filter(
+            CategoriaModel.deletedAt == None).all()
 
         resultado = self.serializador.dump(categorias, many=True)
 
@@ -77,6 +78,64 @@ class Categoria(Resource):
             'content': result
         }, 200  # ok (por defecto si no se le pone nada)
 
+    def delete(self, id):
+        # SELECT id FROM categorias WHERE id = '' AND deleted_at IS NULL;
+        categoriaEncontrada = conexion.session.query(CategoriaModel).filter(
+            CategoriaModel.id == id,
+            CategoriaModel.deletedAt == None).with_entities(CategoriaModel.id).first()
+
+        if categoriaEncontrada is None:
+            return {
+                'message': 'Categoria no existe'
+            }, 404
+
+        # Asi se realiza el update de los elementos de la tabla Categorias
+        # UPDATE categorias SET deleted_at = '' WHERE id = '';
+        conexion.session.query(CategoriaModel).filter(CategoriaModel.id == id).update(
+            {CategoriaModel.deletedAt: datetime.now()})
+
+        conexion.session.commit()
+
+        return {
+            'message': 'Categoria eliminada con exito'
+        }
+
+    def put(self, id):
+        body = request.get_json()
+        try:
+            categoriaEncontrada = conexion.session.query(CategoriaModel).filter(
+                CategoriaModel.deletedAt == None).with_entities(CategoriaModel.id).first()
+
+            if not categoriaEncontrada:
+                return {
+                    'message': 'Categoria no existe'
+                }, 404
+
+            dataValidada = self.serializador.load(body)
+
+            conexion.session.query(CategoriaModel).filter(
+                CategoriaModel.id == id).update(dataValidada)
+
+            # el metodo get hace que la busqueda sea mas optima ya que solamente buscara por las columnas indexadas haciendo que sea mejor siempre y cuando la columna a buscar este indexada (es unique o primary key)
+            categoriaActualizada = conexion.session.query(
+                CategoriaModel).get(id)
+
+            conexion.session.commit()
+
+            resultado = self.serializador.dump(categoriaActualizada)
+
+            return {
+                'message': 'Categoria actualizada exitosamente',
+                'content': resultado
+            }
+
+        except ValidationError as error:
+            return {
+                'message': 'Error al actualizar la categoria',
+                'content': error.args
+            }, 400
+
 
 # Luego de haber declarado todos nuestros Recursos ahora agregaremos esos recursos a nuestra Api
 categoria_api.add_resource(Categorias, '/categorias')
+categoria_api.add_resource(Categoria, '/categoria/<int:id>')

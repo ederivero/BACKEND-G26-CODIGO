@@ -9,6 +9,9 @@ class CategoriaModel(conexion.Model):
                 nullable=False, primary_key=True)
     nombre = Column(type_=types.Text, nullable=False)
     orden = Column(type_=types.Integer, nullable=False)
+    # fecha > deletedAt (la fecha de cuando se "elimino")
+    # deleted > boolean
+    deletedAt = Column(type_=types.DateTime, name='deleted_at')
 
     # Servira para poder modificar el nombre con el cual se creara la tabla en la bd
     __tablename__ = 'categorias'

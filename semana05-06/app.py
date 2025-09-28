@@ -1,9 +1,11 @@
-from flask import Flask
+from flask import Flask, render_template
 from bd import conexion
 from os import environ
 from dotenv import load_dotenv
-from categoria import categorias_blueprint
+from categoria import categorias_blueprint, CategoriaModel
 from flask_migrate import Migrate
+
+
 load_dotenv()
 
 app = Flask(__name__)
@@ -18,6 +20,18 @@ conexion.init_app(app)
 
 # Luego de inicializar mi conexion con la bd creamos el flujo de migracion
 Migrate(app, conexion)
+
+
+@app.route('/')
+def inicio():
+    data = [{"id": 1, "nombre": "Eduardo", "edad": 21},
+            {"id": 2, "nombre": "Luis", "edad": 18},
+            {"id": 3, "nombre": "Sebastian", "edad": 19}]
+
+    categorias = conexion.session.query(CategoriaModel).all()
+    print(categorias)
+    # Mostrar en una tabla todas las categorias y las que estan eliminadas colocar una columna ELIMINADO
+    return render_template('inicio.html', nombre='Backend G-26', data=data, categorias=categorias)
 
 
 # Aca registraremos los mini-apps en nuestra aplicacion principal

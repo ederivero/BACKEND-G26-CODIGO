@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block titulo %}
+Inicio Flask
+{% endblock %}
+
+{% block contenido %}
+<p>Hola a todos desde flask al grupo {{ nombre or "NO HAY GRUPO TODAVIA" }}</p>
+
+{# https://jinja.palletsprojects.com/en/stable/templates/#if #}
+{% if data %}
+    <table class="min-w-full border border-gray-200 text-sm">
+        <thead class="bg-gray-100">
+            <th class="px-4 py-2 text-left font-semibold text-gray-700">id</th>
+            <th class="px-4 py-2 text-left font-semibold text-gray-700">nombre</th>
+            <th class="px-4 py-2 text-left font-semibold text-gray-700">edad</th>
+        </thead>
+        <tbody>
+            {# https://jinja.palletsprojects.com/en/stable/templates/#for #}
+            {% for registro in data %}
+                <tr class="hover:bg-gray-100">
+                    <td class="px-4 py-2 border-t">{{ registro.id }}</td>
+                    <td class="px-4 py-2 border-t">{{ registro.nombre }}</td>
+                    <td class="px-4 py-2 border-t">{{ registro.edad }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <span>No hay data que mostrar :(</span>
+{% endif %}
+
+
+{% if categorias %}
+    <table class="min-w-full border border-gray-200 text-sm">
+        <thead class="bg-gray-100">
+            <th class="px-4 py-2 text-left font-semibold text-gray-700">id</th>
+            <th class="px-4 py-2 text-left font-semibold text-gray-700">nombre</th>
+            <th class="px-4 py-2 text-left font-semibold text-gray-700">orden</th>
+            <th class="px-4 py-2 text-left font-semibold text-gray-700">estado</th>
+        </thead>
+        <tbody>
+            {# https://jinja.palletsprojects.com/en/stable/templates/#for #}
+            {% for registro in categorias %}
+                <tr class="hover:bg-gray-100">
+                    <td class="px-4 py-2 border-t">{{ registro.id }}</td>
+                    <td class="px-4 py-2 border-t">{{ registro.nombre }}</td>
+                    <td class="px-4 py-2 border-t">{{ registro.orden }}</td>
+                    <td class="px-4 py-2 border-t {{'bg-red-100' if registro.deletedAt else None}}">{{ "ELIMINADO" if registro.deletedAt else "HABILITADO" }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+
+
+
+{% endblock %}

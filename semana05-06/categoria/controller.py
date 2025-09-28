@@ -57,5 +57,26 @@ class Categorias(Resource):
             }
 
 
+# /categoria/:id
+class Categoria(Resource):
+    serializador = CategoriaSerializer()
+
+    def get(self, id):
+        # SELECT * FROM categorias WHERE id = '' LIMIT 1;
+        categoriaEncontrada = conexion.session.query(
+            CategoriaModel).filter(CategoriaModel.id == id).first()
+
+        if not categoriaEncontrada:
+            return {
+                'message': 'La categoria no existe'
+            }, 404  # not found
+
+        result = self.serializador.dump(categoriaEncontrada)
+
+        return {
+            'content': result
+        }, 200  # ok (por defecto si no se le pone nada)
+
+
 # Luego de haber declarado todos nuestros Recursos ahora agregaremos esos recursos a nuestra Api
 categoria_api.add_resource(Categorias, '/categorias')

@@ -38,6 +38,19 @@ class Categorias(Resource):
             # CategoriaModel(nombre=dataSerializada.get('nombre'),
             #                orden=dataSerializada.get('orden'))
 
+            # encontraremos la ultima posicion de la categoria
+            # SELECT orden FROM categorias ORDER BY orden DESC;
+            ultimaPosicion = conexion.session.query(CategoriaModel).order_by(
+                CategoriaModel.orden.desc()).with_entities(CategoriaModel.orden).first()
+
+            # Operador ternario
+            # VALOR_SI_ES_VERDADERO if CONDICION else VALOR_SI_ES_FALSO
+            posicion = ultimaPosicion[0] + 1 if ultimaPosicion and len(
+                ultimaPosicion) == 1 else 1
+
+            # aqui agregamos el orden con el calculo de la ultima posicion
+            dataSerializada['orden'] = posicion
+
             # ** en paso de parametros lo que hace es convierte el diccionario a sus llaves las vuelve los parametros y sus valores a los valores de esos parametros
             nuevaCategoria = CategoriaModel(**dataSerializada)
             # Añadimos a la conexion nuestra nueva categoria

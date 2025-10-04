@@ -8,7 +8,7 @@ class CategoriaModel(conexion.Model):
     id = Column(type_=types.Integer, autoincrement=True,
                 nullable=False, primary_key=True)
     nombre = Column(type_=types.Text, nullable=False)
-    orden = Column(type_=types.Integer, nullable=False)
+    posicion = Column(type_=types.Float, nullable=False)
     # fecha > deletedAt (la fecha de cuando se "elimino")
     # deleted > boolean
     deletedAt = Column(type_=types.DateTime, name='deleted_at')

@@ -21,7 +21,7 @@ class Categorias(Resource):
         # Asi se utiliza el ORM
         # SELECT * FROM categorias WHERE deleted_at IS NULL;
         categorias = conexion.session.query(CategoriaModel).filter(
-            CategoriaModel.deletedAt == None).all()
+            CategoriaModel.deletedAt == None).order_by(CategoriaModel.posicion.asc()).all()
 
         resultado = self.serializador.dump(categorias, many=True)
 
@@ -203,3 +203,4 @@ class ReordenarCategoria(Resource):
 # Luego de haber declarado todos nuestros Recursos ahora agregaremos esos recursos a nuestra Api
 categoria_api.add_resource(Categorias, '/categorias')
 categoria_api.add_resource(Categoria, '/categoria/<int:id>')
+categoria_api.add_resource(ReordenarCategoria, '/categoria/cambiar-orden')

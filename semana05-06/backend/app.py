@@ -4,11 +4,15 @@ from os import environ
 from dotenv import load_dotenv
 from categoria import categorias_blueprint, CategoriaModel
 from flask_migrate import Migrate
-
+from flask_cors import CORS
 
 load_dotenv()
 
 app = Flask(__name__)
+# methods > GET | POST | PUT | DELETE | PATCH | *
+# origins > que clientes pueden acceder a mi API (*)
+# headers > que cabeceras pueden enviarse (*)
+CORS(app, origins=['http://localhost:5173'], methods='*')
 # Se almacenan variables que sirve para el funcionamiento de la aplicacion, no son las mismas  que las variables de entorno
 # print(app.config)
 

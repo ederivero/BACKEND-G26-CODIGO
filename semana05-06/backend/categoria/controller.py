@@ -2,7 +2,7 @@ from flask_restful import Resource, Api, request
 from flask import Blueprint
 from .model import CategoriaModel
 from bd import conexion
-from .serializer import CategoriaSerializer
+from .serializer import CategoriaSerializer, ReordenarCategoriaSerializer
 from marshmallow.exceptions import ValidationError
 from datetime import datetime
 # Ahora registraremos nuestro blueprint (mini aplicacion de categorias)
@@ -41,7 +41,7 @@ class Categorias(Resource):
             # encontraremos la ultima posicion de la categoria
             # SELECT orden FROM categorias ORDER BY orden DESC;
             ultimaPosicion = conexion.session.query(CategoriaModel).order_by(
-                CategoriaModel.orden.desc()).with_entities(CategoriaModel.orden).first()
+                CategoriaModel.posicion.desc()).with_entities(CategoriaModel.posicion).first()
 
             # Operador ternario
             # VALOR_SI_ES_VERDADERO if CONDICION else VALOR_SI_ES_FALSO
@@ -49,7 +49,7 @@ class Categorias(Resource):
                 ultimaPosicion) == 1 else 1
 
             # aqui agregamos el orden con el calculo de la ultima posicion
-            dataSerializada['orden'] = posicion
+            dataSerializada['posicion'] = posicion
 
             # ** en paso de parametros lo que hace es convierte el diccionario a sus llaves las vuelve los parametros y sus valores a los valores de esos parametros
             nuevaCategoria = CategoriaModel(**dataSerializada)
@@ -145,6 +145,57 @@ class Categoria(Resource):
         except ValidationError as error:
             return {
                 'message': 'Error al actualizar la categoria',
+                'content': error.args
+            }, 400
+
+
+class ReordenarCategoria(Resource):
+    def post(self):
+        data = request.get_json()
+        serializador = ReordenarCategoriaSerializer()
+        try:
+            dataSerializada = serializador.load(data)
+            categoriaId = dataSerializada.get('categoriaId')
+            idVecinoAnterior = dataSerializada.get('idVecinoAnterior')
+            idVecinoProximo = dataSerializada.get('idVecinoProximo')
+
+            nuevaPosicion = 0
+            # Si hay vecinoAnterior y vecinoProximo entonces se debe acomodar entre esos dos
+            if idVecinoAnterior and idVecinoProximo:
+                vecinoAnterior = conexion.session.query(
+                    CategoriaModel).filter(CategoriaModel.id == idVecinoAnterior).first()
+                vecinoProximo = conexion.session.query(
+                    CategoriaModel).filter(CategoriaModel.id == idVecinoProximo).first()
+
+                posicionVecinoAnterior = vecinoAnterior.posicion
+                posicionVecinoProximo = vecinoProximo.posicion
+
+                nuevaPosicion = (posicionVecinoAnterior +
+                                 posicionVecinoProximo)/2
+            # Si solo hay vecinoAnterior entonces va al final de la lista
+            elif idVecinoAnterior:
+                vecinoAnterior = conexion.session.query(
+                    CategoriaModel).filter(CategoriaModel.id == idVecinoAnterior).first()
+                posicionVecinoAnterior = vecinoAnterior.posicion
+                nuevaPosicion = posicionVecinoAnterior + 1
+            # Si solo hay vecinoProximo entonces va al inicio de la lista
+            elif idVecinoProximo:
+                vecinoProximo = conexion.session.query(
+                    CategoriaModel).filter(CategoriaModel.id == idVecinoProximo).first()
+                posicionVecinoProximo = vecinoProximo.posicion
+                nuevaPosicion = posicionVecinoProximo / 2
+
+            conexion.session.query(CategoriaModel).filter(
+                CategoriaModel.id == categoriaId).update({'posicion': nuevaPosicion})
+
+            conexion.session.commit()
+
+            return {
+                'message': 'Categoria actualizada exitosamente'
+            }
+        except ValidationError as error:
+            return {
+                'message': 'Error al cambiar el orden de la categoria',
                 'content': error.args
             }, 400
 

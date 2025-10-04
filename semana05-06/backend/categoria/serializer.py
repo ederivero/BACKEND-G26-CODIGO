@@ -1,4 +1,5 @@
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
+from marshmallow import Schema, fields
 from .model import CategoriaModel
 
 
@@ -10,3 +11,9 @@ class CategoriaSerializer(SQLAlchemyAutoSchema):
     class Meta:
         # Modificar los atributos de la clase que estamos heredando sin la necesidad de crear un metodo para editarlos, sino que directamente se hace dentro de la clase Meta (Metadata)
         model = CategoriaModel
+
+
+class ReordenarCategoriaSerializer(Schema):
+    categoriaId = fields.Int(required=True)
+    idVecinoAnterior = fields.Int(required=False)
+    idVecinoProximo = fields.Int(required=False)

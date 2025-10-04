@@ -3,10 +3,17 @@ import {
     Draggable,
     DragDropContext
 } from '@hello-pangea/dnd'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { listarCategorias } from '../../services/categoria'
 
 export const Categorias = () => {
-    const [items, setItems] = useState([{ id: '1', text: 'Primero' }, { id: '2', text: 'Segundo' }, { id: '3', text: 'Tercero' }])
+    const [items, setItems] = useState([])
+
+    useEffect(() => {
+        listarCategorias().then((categorias) => {
+            setItems(categorias.content)
+        })
+    }, [])
 
     const reorder = (list, start, end) => {
         const result = [...list]
@@ -19,6 +26,7 @@ export const Categorias = () => {
         const { destination, source } = result
         if (!destination) return
         if (destination.index === source.index) return
+        console.log(result)
         setItems(prev => reorder(prev, source.index, destination.index))
     }
 
@@ -34,7 +42,7 @@ export const Categorias = () => {
                             minHeight: 60,
                         }}>
                             {items.map((item, index) => (
-                                <Draggable draggableId={item.id} index={index} key={item.id}>
+                                <Draggable draggableId={`${item.id}`} index={index} key={item.id}>
                                     {(provided, snapshot) => (
                                         <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} style={{
                                             background: '#fff',
@@ -49,7 +57,7 @@ export const Categorias = () => {
                                             cursor: 'grab',
                                             ...provided.draggableProps.style,
                                         }}>
-                                            {item.text}
+                                            {item.nombre}
                                         </div>)}
                                 </Draggable>
                             ))}

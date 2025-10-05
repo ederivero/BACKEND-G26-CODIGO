@@ -4,7 +4,7 @@ import {
     DragDropContext
 } from '@hello-pangea/dnd'
 import { useEffect, useState } from 'react'
-import { listarCategorias } from '../../services/categoria'
+import { listarCategorias, reordenarCategoria } from '../../services/categoria'
 
 export const Categorias = () => {
     const [items, setItems] = useState([])
@@ -22,11 +22,32 @@ export const Categorias = () => {
         return result
     }
 
-    const onDragEnd = (result) => {
+    const onDragEnd = async (result) => {
         const { destination, source } = result
         if (!destination) return
         if (destination.index === source.index) return
         console.log(result)
+
+        const categoriaId = result.draggableId
+        let idVecinoProximo
+        let idVecinoAnterior
+
+        if (source.index + 1 === destination.index) {
+            idVecinoAnterior = items[destination.index].id
+            idVecinoProximo = items[destination.index + 1]?.id
+        } else {
+            if (source.index > destination.index) {
+                idVecinoProximo = items[destination.index].id
+                idVecinoAnterior = destination.index === 0 ? null : items[destination.index - 1].id
+            } else {
+                idVecinoProximo = items[destination.index + 1]?.id
+                idVecinoAnterior = destination.index === 0 ? null : items[destination.index].id
+            }
+
+        }
+        console.log({ categoriaId, idVecinoAnterior, idVecinoProximo })
+        const data = await reordenarCategoria({ categoriaId, idVecinoAnterior, idVecinoProximo })
+        console.log(data)
         setItems(prev => reorder(prev, source.index, destination.index))
     }
 

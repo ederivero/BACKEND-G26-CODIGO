@@ -6,3 +6,8 @@ export async function listarCategorias (){
     const request = await api.get('/categorias')
     return request.data
 }
+
+export async function reordenarCategoria(data){
+    const request = await api.post('/categoria/cambiar-orden',data)
+    return request.data
+}

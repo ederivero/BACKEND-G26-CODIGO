@@ -15,5 +15,6 @@ class CategoriaSerializer(SQLAlchemyAutoSchema):
 
 class ReordenarCategoriaSerializer(Schema):
     categoriaId = fields.Int(required=True)
-    idVecinoAnterior = fields.Int(required=False)
-    idVecinoProximo = fields.Int(required=False)
+    # allow_none > Permite que el valor de esta propiedad pueda ser null | None
+    idVecinoAnterior = fields.Int(required=False, allow_none=True)
+    idVecinoProximo = fields.Int(required=False, allow_none=True)

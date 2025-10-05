@@ -9,10 +9,11 @@ from flask_cors import CORS
 load_dotenv()
 
 app = Flask(__name__)
-# methods > GET | POST | PUT | DELETE | PATCH | *
+# methods > GET | POST | PUT | DELETE | PATCH
 # origins > que clientes pueden acceder a mi API (*)
 # headers > que cabeceras pueden enviarse (*)
-CORS(app, origins=['http://localhost:5173'], methods='*')
+CORS(app, origins=['http://localhost:5173'],
+     methods=['GET', 'POST', 'PUT', 'DELETE'])
 # Se almacenan variables que sirve para el funcionamiento de la aplicacion, no son las mismas  que las variables de entorno
 # print(app.config)
 

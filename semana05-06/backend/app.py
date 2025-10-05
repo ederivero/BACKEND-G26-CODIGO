@@ -3,6 +3,7 @@ from bd import conexion
 from os import environ
 from dotenv import load_dotenv
 from categoria import categorias_blueprint, CategoriaModel
+from producto import producto_blueprint
 from flask_migrate import Migrate
 from flask_cors import CORS
 
@@ -41,6 +42,7 @@ def inicio():
 
 # Aca registraremos los mini-apps en nuestra aplicacion principal
 app.register_blueprint(categorias_blueprint)
+app.register_blueprint(producto_blueprint)
 
 if (__name__ == '__main__'):
     app.run(debug=True)

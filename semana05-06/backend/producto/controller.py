@@ -90,6 +90,7 @@ class Producto(Resource):
                 'message': 'Producto no encontrado'
             }, 404
 
+        print(productoEncontrado.categoria)
         resultado = self.serializador.dump(productoEncontrado)
 
         return {

@@ -1,5 +1,6 @@
 from bd import conexion
 from sqlalchemy import Column, types, ForeignKey
+from sqlalchemy.orm import relationship
 
 
 class ProductoModel(conexion.Model):
@@ -12,5 +13,9 @@ class ProductoModel(conexion.Model):
     # Relaciones
     categoriaId = Column(ForeignKey(column='categorias.id'),
                          nullable=True, name='categoria_id')
+
+    # Relationships
+    # es la relacion pero a nivel del ORM , esto no afecta en nada a la bd, podemos crear relationships sin la necesidad de tener nuestras relaciones en la bd
+    categoria = relationship('CategoriaModel')
 
     __tablename__ = 'productos'

@@ -3,7 +3,7 @@ from bd import conexion
 from datetime import datetime
 
 
-class Usuario(conexion.Model):
+class UsuarioModel(conexion.Model):
     id = Column(type_=types.Integer, autoincrement=True, primary_key=True)
     nombre = Column(type_=types.Text, nullable=False)
     correo = Column(type_=types.Text, nullable=False, unique=True)

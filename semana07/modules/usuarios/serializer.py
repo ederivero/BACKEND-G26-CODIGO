@@ -1,7 +1,15 @@
-from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
-from .model import Usuario
+from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
+from marshmallow import Schema, fields
+from .model import UsuarioModel
 
 
-class RegistrarUsuario(SQLAlchemyAutoSchema):
+class RegistrarUsuarioSerializer(SQLAlchemyAutoSchema):
+    # Modificar el serializador para indicar que la password sea load_only
+    password = auto_field(load_only=True)
+
     class Meta:
-        model = Usuario
+        model = UsuarioModel
+
+
+class HabilitarUsuarioSerializer(Schema):
+    token = fields.Str(required=True)

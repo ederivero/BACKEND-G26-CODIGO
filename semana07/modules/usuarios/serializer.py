@@ -13,3 +13,8 @@ class RegistrarUsuarioSerializer(SQLAlchemyAutoSchema):
 
 class HabilitarUsuarioSerializer(Schema):
     token = fields.Str(required=True)
+
+
+class LoginSerializer(Schema):
+    correo = fields.Email(required=True)
+    password = fields.Str(required=True)

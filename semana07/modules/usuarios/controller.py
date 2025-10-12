@@ -1,13 +1,14 @@
 from flask_restful import request, Resource
 from marshmallow.exceptions import ValidationError
-from bcrypt import gensalt, hashpw
-from .serializer import RegistrarUsuarioSerializer, HabilitarUsuarioSerializer
+from bcrypt import gensalt, hashpw, checkpw
+from .serializer import RegistrarUsuarioSerializer, HabilitarUsuarioSerializer, LoginSerializer
 from .model import UsuarioModel
 from bd import conexion
 from utils import enviarCorreoDeValidacion
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
 from os import environ
 from ast import literal_eval
+from flask_jwt_extended import create_access_token, jwt_required,  get_jwt_identity
 
 
 class RegistrarUsuario(Resource):
@@ -71,7 +72,25 @@ class HabilitarUsuario(Resource):
             informacionSecreta = encriptador.decrypt(token).decode('utf-8')
             # convertimos un str a un dict
             informacionSecretaDict = literal_eval(informacionSecreta)
-            print(informacionSecretaDict.get('id'))
+            id = informacionSecretaDict.get('id')
+
+            usuarioEncontrado = conexion.session.query(
+                UsuarioModel).filter(UsuarioModel.id == id).first()
+
+            if not usuarioEncontrado:
+                return {
+                    'message': 'Usuario no existe'
+                }, 400
+            # Actualizar el validado a True de ese usuario y agregar una condicional que si el usuario ya esta validado no se puede validar nuevamente
+            if usuarioEncontrado.validado:
+                return {
+                    'message': 'El usuario ya esta validado, no se puede validar'
+                }, 400
+
+            conexion.session.query(UsuarioModel).filter(
+                UsuarioModel.id == id).update({'validado': True})
+
+            conexion.session.commit()
 
             return {
                 'message': 'Usuario habilitado exitosamente'
@@ -80,4 +99,81 @@ class HabilitarUsuario(Resource):
             return {
                 'message': 'Error al obtener la token',
                 'content': error.args
-            }
+            }, 400
+        except InvalidToken as error:
+            return {
+                'message': 'Error al obtener la data de la token',
+                'content': error.args
+            }, 400
+
+
+class Login(Resource):
+    serializer = LoginSerializer()
+
+    def post(self):
+        data = request.get_json()
+        try:
+            # {'correo':'...', 'password': '...'}
+            dataSerializada = self.serializer.load(data)
+
+            usuarioEncontrado = conexion.session.query(UsuarioModel).filter(
+                UsuarioModel.correo == dataSerializada.get('correo')).first()
+
+            if not usuarioEncontrado:
+                return {
+                    'message': 'Usuario no existe'
+                }, 400
+
+            # Validar las password
+            # 1. Convertimos las passwords tanto la entrante como la almacena en la bd a bytes
+            password = dataSerializada.get('password').encode('utf-8')
+            passwordHasheada = usuarioEncontrado.password.encode('utf-8')
+
+            # 2. Luego con el metodo checkpw validamos si son, esto retornara True | False
+            resultado = checkpw(password, passwordHasheada)
+            if resultado:
+                # al momento de agregar informacion adicional NO UTILIZAR las llaves que son creadas por la libreria como exp, iat, nbf, jti, type, fresh
+                informacionAdicional = {
+                    'nombre': usuarioEncontrado.nombre, 'correo': usuarioEncontrado.correo}
+
+                # el identificador de la token tiene que ser un string, no puede ser un numero
+                token = create_access_token(
+                    identity=str(usuarioEncontrado.id), additional_claims=informacionAdicional)
+                return {
+                    'message': 'Bienvenido',
+                    'content': token
+                }
+            else:
+                return {
+                    'message': 'Credenciales incorrectas'
+                }, 400
+        except ValidationError as error:
+            return {
+                'message': 'Error al hacer el login',
+                'content': error.args
+            }, 400
+
+
+class Perfil(Resource):
+    serializador = RegistrarUsuarioSerializer()
+
+    # Indica que para poder acceder a este metodo se necesite de manera obligatoria una token en los headers
+    @jwt_required()
+    def get(self):
+        # me retornara el identificador del usuario que esta accediendo a este controlador, si no hay, su valor sera None
+        identificador = get_jwt_identity()
+        print(identificador)
+        usuarioEncontrado = conexion.session.query(UsuarioModel).filter(
+            UsuarioModel.id == identificador).first()
+
+        resultado = self.serializador.dump(usuarioEncontrado)
+        return {
+            'content': resultado
+        }
+
+    # put > para actualizaciones totales (todo el registro)
+    # patch > actualizaciones parciales (solamente uno o varios campos mas no obligatoriamente todos)
+    @jwt_required()
+    def patch(self):
+        identificador = get_jwt_identity()
+        # actualizar SOLAMENTE el nombre y password, y si envia la password generar el hashing nuevamente

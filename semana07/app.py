@@ -7,6 +7,7 @@ from modules.usuarios import usuarioBlueprint
 from requests import post
 from flask_jwt_extended import JWTManager
 from datetime import timedelta
+from cloudinary import config
 load_dotenv()
 
 app = Flask(__name__)
@@ -21,6 +22,10 @@ conexion.init_app(app)
 
 Migrate(app, conexion)
 JWTManager(app)
+
+config(cloudname=environ.get('CLOUDINARY_NAME'),
+       api_key=environ.get('CLOUDINARY_API_KEY'),
+       api_secret=environ.get('CLOUDINARY_API_SECRET'))
 
 
 @app.route('/validar-usuario')

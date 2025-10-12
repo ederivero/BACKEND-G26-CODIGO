@@ -1,7 +1,7 @@
 from flask_restful import request, Resource
 from marshmallow.exceptions import ValidationError
 from bcrypt import gensalt, hashpw, checkpw
-from .serializer import RegistrarUsuarioSerializer, HabilitarUsuarioSerializer, LoginSerializer
+from .serializer import RegistrarUsuarioSerializer, HabilitarUsuarioSerializer, LoginSerializer, PatchUsuarioSerializer
 from .model import UsuarioModel
 from bd import conexion
 from utils import enviarCorreoDeValidacion
@@ -9,6 +9,7 @@ from cryptography.fernet import Fernet, InvalidToken
 from os import environ
 from ast import literal_eval
 from flask_jwt_extended import create_access_token, jwt_required,  get_jwt_identity
+from cloudinary import api
 
 
 class RegistrarUsuario(Resource):
@@ -117,7 +118,7 @@ class Login(Resource):
             dataSerializada = self.serializer.load(data)
 
             usuarioEncontrado = conexion.session.query(UsuarioModel).filter(
-                UsuarioModel.correo == dataSerializada.get('correo')).first()
+                UsuarioModel.correo == dataSerializada.get('correo'), UsuarioModel.validado == True).first()
 
             if not usuarioEncontrado:
                 return {
@@ -176,4 +177,46 @@ class Perfil(Resource):
     @jwt_required()
     def patch(self):
         identificador = get_jwt_identity()
+        serializador = PatchUsuarioSerializer()
         # actualizar SOLAMENTE el nombre y password, y si envia la password generar el hashing nuevamente
+        try:
+            dataValidada = serializador.load(request.get_json())
+            # SELECT id FROM usuarios WHERE id ='...';
+            usuarioEncontrado = conexion.session.query(UsuarioModel).filter(
+                UsuarioModel.id == identificador).with_entities(UsuarioModel.id).first()
+
+            if not usuarioEncontrado:
+                return {
+                    'message': 'Usuario no existe'
+                }, 400
+
+            nuevaInfo = {}
+
+            if dataValidada.get('nombre'):
+                nuevaInfo['nombre'] = dataValidada.get('nombre')
+
+            if dataValidada.get('password'):
+                salt = gensalt()
+                nuevaPassword = dataValidada.get('password').encode('utf-8')
+                passwordHasheada = hashpw(nuevaPassword, salt).decode('utf-8')
+                nuevaInfo['password'] = passwordHasheada
+
+            conexion.session.query(UsuarioModel).filter(
+                UsuarioModel.id == identificador).update(nuevaInfo)
+            conexion.session.commit()
+
+            return {
+                'message': 'Usuario actualizado exitosamente',
+                'content': ''
+            }
+
+        except ValidationError as error:
+            return {
+                'message': 'Error al actualizar el usuario',
+                'content': error.args
+            }, 400
+
+
+class GenerarLinkDeFoto(Resource):
+    def post(self):
+        pass

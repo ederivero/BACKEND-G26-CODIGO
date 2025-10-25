@@ -49,6 +49,7 @@ def validarUsuario():
 
 
 app.register_blueprint(usuarioBlueprint)
+app.register_blueprint(multimediaBlueprint)
 
 if __name__ == '__main__':
     app.run(debug=True)

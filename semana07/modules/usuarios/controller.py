@@ -135,11 +135,13 @@ class Login(Resource):
             if resultado:
                 # al momento de agregar informacion adicional NO UTILIZAR las llaves que son creadas por la libreria como exp, iat, nbf, jti, type, fresh
                 informacionAdicional = {
-                    'nombre': usuarioEncontrado.nombre, 'correo': usuarioEncontrado.correo}
+                    'nombre': usuarioEncontrado.nombre, 'correo': usuarioEncontrado.correo
+                }
 
                 # el identificador de la token tiene que ser un string, no puede ser un numero
                 token = create_access_token(
                     identity=str(usuarioEncontrado.id), additional_claims=informacionAdicional)
+
                 return {
                     'message': 'Bienvenido',
                     'content': token
@@ -215,8 +217,3 @@ class Perfil(Resource):
                 'message': 'Error al actualizar el usuario',
                 'content': error.args
             }, 400
-
-
-class GenerarLinkDeFoto(Resource):
-    def post(self):
-        pass

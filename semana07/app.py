@@ -8,6 +8,7 @@ from requests import post
 from flask_jwt_extended import JWTManager
 from datetime import timedelta
 from cloudinary import config
+from modules.multimedia import multimediaBlueprint
 load_dotenv()
 
 app = Flask(__name__)

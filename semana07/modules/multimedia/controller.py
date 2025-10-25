@@ -91,5 +91,18 @@ class ActualizarFotoUsuario(Resource):
 
 
 class DevolverMultimediaUrl(Resource):
-    def get(self):
-        pass
+    def get(self, nombreImagen):
+        parametros = {
+            'source': 'pruebas/'+nombreImagen,
+            'cloud_name': environ.get('CLOUDINARY_NAME'),
+            'resource_type': 'image',
+            'secure': True,
+            # opcionalmente podemos agregar transformaciones a las imagenes
+            'transformation': [{'width': 400, 'height': 400, 'crop': 'fill', 'effect': "vignette"}]
+        }
+
+        resultado = utils.cloudinary_url(**parametros)
+
+        return {
+            'url': resultado[0]
+        }

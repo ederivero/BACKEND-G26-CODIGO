@@ -43,7 +43,7 @@ const subirCloudinary = async (content) => {
     formData.append('timestamp',String(content.timestamp)) // El valor de timestamp tiene que ser un string
     formData.append('signature',content.signature)
     // TODO: modificar esta propiedad para utilizar el public_id del backend en vez del nombre del archivo
-    formData.append('public_id', archivo.name.split('.')[0])
+    formData.append('public_id', content.public_id)
     formData.append('folder', folder)
 
 
@@ -51,8 +51,8 @@ const subirCloudinary = async (content) => {
     console.log(response.status)
 }
 
-const actualizarFotoEnLaAPI = async () => {
-    const [fileName, extension] = archivo.name.split('.')
+const actualizarFotoEnLaAPI = async (public_id) => {
+    const [_, extension] = archivo.name.split('.')
     await fetch(`${BASE_URL}/multimedia/actualizar-foto-usuario`,{
         method:'PUT', 
         headers:{
@@ -61,7 +61,7 @@ const actualizarFotoEnLaAPI = async () => {
         },
         body:JSON.stringify({
             usuarioId,
-            fileName,
+            fileName:public_id,
             extension,
             folder,
             contentType:archivo.type
@@ -94,7 +94,7 @@ actualizar.addEventListener('click',async (e)=>{
         
         await subirCloudinary(content)
         
-        await actualizarFotoEnLaAPI()
+        await actualizarFotoEnLaAPI(content.public_id)
     }
 
     await actualizacionUsuario()

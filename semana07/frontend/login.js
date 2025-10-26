@@ -9,7 +9,10 @@ login.addEventListener('click',async (e)=>{
         correo:correo.value,
         password: password.value
     })})
-
+    if(response.status!==200){
+        alert('Error al hacer el login')
+        return
+    }
     const data = await response.json()
 
     const token = data.content

@@ -1,5 +1,5 @@
 from flask_restful import Resource, request
-from cloudinary import utils
+from cloudinary import utils, uploader
 from datetime import datetime
 from os import environ
 from .serializer import GenerarLinkSerializer, ActualizarFotoUsuarioSerializer
@@ -20,16 +20,15 @@ class GenerarLinkDeFoto(Resource):
         try:
             dataValidada = serializador.load(request.get_json())
             timestamp = round(datetime.now().timestamp())
+            public_id = str(uuid4())+'_'+dataValidada.get('fileName')
+            print(public_id)
             parametros = {
                 # timestamp sirve para validar la hora en la cual ah sido creado la firma
                 'timestamp': timestamp,
                 # folder serviria por si queremos guardar en una carpeta en especifico nuestro archivo
                 'folder': dataValidada.get('folder'),
                 # public_id es el nombre del archivo con el que se guardara y hara la validacion que al momento de subirlo sea el mismo nombre de archivo, si es diferente lanzara un error
-                # TODO
-                # Agregar al public_id un identificador unico (UUID)
-                # uuid4()
-                'public_id': 'asdadadadsa'+dataValidada.get('fileName')
+                'public_id': public_id
             }
 
             signature = utils.api_sign_request(
@@ -46,9 +45,7 @@ class GenerarLinkDeFoto(Resource):
                     'apiKey': apiKey,
                     'url': f'{cloudinaryUrl}/{cloudName}/image/upload',
                     'folder': folder,
-                    # TODO
-                    # devolver el public id que seria el fileName con el uuid
-                    'public_id': ''
+                    'public_id': public_id
                 }
             }
         except ValidationError as error:
@@ -63,6 +60,9 @@ class ActualizarFotoUsuario(Resource):
     def put(self):
         usuarioId = get_jwt_identity()
         # TODO: Cuando yo actualice mi imagen si el usuario ya tiene una imagen en la tabla multimedias, entonces actualizar el registro, caso contrario crearlo
+        # Para eliminar un archivo de cloudinary usamos el metodo destroy y en el publicid seria la carpeta y su publicid
+        uploader.destroy('pruebas/perfil',
+                         cloud_name=environ.get('CLOUDINARY_NAME'))
 
         # Primero crear un serializador llamado ActualizarFotoUsuarioSerializer
         serializer = ActualizarFotoUsuarioSerializer()

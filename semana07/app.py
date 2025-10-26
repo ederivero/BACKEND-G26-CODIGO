@@ -9,9 +9,11 @@ from flask_jwt_extended import JWTManager
 from datetime import timedelta
 from cloudinary import config
 from modules.multimedia import multimediaBlueprint
+from flask_cors import CORS
 load_dotenv()
 
 app = Flask(__name__)
+CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('DATABASE_URL')
 # Para configurar nuestra JWT tenemos que setear el valor de esta variable
 # https://flask-jwt-extended.readthedocs.io/en/stable/options.html

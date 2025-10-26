@@ -6,10 +6,14 @@ from .serializer import GenerarLinkSerializer, ActualizarFotoUsuarioSerializer
 from marshmallow import ValidationError
 from ..usuarios import UsuarioModel
 from .model import MultimediaModel
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from uuid import uuid4
+
 from bd import conexion
 
 
 class GenerarLinkDeFoto(Resource):
+    @jwt_required()
     def post(self):
         # generaremos una url firmada para que puedan subir imagenes a nuestro cloudinary basandonos en configuraciones
         serializador = GenerarLinkSerializer()
@@ -22,7 +26,10 @@ class GenerarLinkDeFoto(Resource):
                 # folder serviria por si queremos guardar en una carpeta en especifico nuestro archivo
                 'folder': dataValidada.get('folder'),
                 # public_id es el nombre del archivo con el que se guardara y hara la validacion que al momento de subirlo sea el mismo nombre de archivo, si es diferente lanzara un error
-                'public_id': dataValidada.get('fileName')+'.'+dataValidada.get('extension').name
+                # TODO
+                # Agregar al public_id un identificador unico (UUID)
+                # uuid4()
+                'public_id': 'asdadadadsa'+dataValidada.get('fileName')
             }
 
             signature = utils.api_sign_request(
@@ -38,7 +45,10 @@ class GenerarLinkDeFoto(Resource):
                     'timestamp': timestamp,
                     'apiKey': apiKey,
                     'url': f'{cloudinaryUrl}/{cloudName}/image/upload',
-                    'folder': folder
+                    'folder': folder,
+                    # TODO
+                    # devolver el public id que seria el fileName con el uuid
+                    'public_id': ''
                 }
             }
         except ValidationError as error:
@@ -49,7 +59,11 @@ class GenerarLinkDeFoto(Resource):
 
 
 class ActualizarFotoUsuario(Resource):
+    @jwt_required()
     def put(self):
+        usuarioId = get_jwt_identity()
+        # TODO: Cuando yo actualice mi imagen si el usuario ya tiene una imagen en la tabla multimedias, entonces actualizar el registro, caso contrario crearlo
+
         # Primero crear un serializador llamado ActualizarFotoUsuarioSerializer
         serializer = ActualizarFotoUsuarioSerializer()
         # usuarioId
@@ -58,7 +72,9 @@ class ActualizarFotoUsuario(Resource):
         # extension
         # contentType
         try:
-            dataValidada = serializer.load(request.get_json())
+            data = request.get_json()
+            data['usuarioId'] = usuarioId
+            dataValidada = serializer.load(data)
             # Validar si el usuario existe y esta validado
             usuarioId = dataValidada.get('usuarioId')
 
@@ -91,6 +107,7 @@ class ActualizarFotoUsuario(Resource):
 
 
 class DevolverMultimediaUrl(Resource):
+    @jwt_required()
     def get(self, nombreImagen):
         parametros = {
             'source': 'pruebas/'+nombreImagen,

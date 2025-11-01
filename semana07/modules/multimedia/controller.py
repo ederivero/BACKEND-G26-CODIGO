@@ -8,7 +8,7 @@ from ..usuarios import UsuarioModel
 from .model import MultimediaModel
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from uuid import uuid4
-
+from flask_sqlalchemy.session import Session
 from bd import conexion
 
 
@@ -61,8 +61,6 @@ class ActualizarFotoUsuario(Resource):
         usuarioId = get_jwt_identity()
         # TODO: Cuando yo actualice mi imagen si el usuario ya tiene una imagen en la tabla multimedias, entonces actualizar el registro, caso contrario crearlo
         # Para eliminar un archivo de cloudinary usamos el metodo destroy y en el publicid seria la carpeta y su publicid
-        uploader.destroy('pruebas/perfil',
-                         cloud_name=environ.get('CLOUDINARY_NAME'))
 
         # Primero crear un serializador llamado ActualizarFotoUsuarioSerializer
         serializer = ActualizarFotoUsuarioSerializer()
@@ -78,31 +76,61 @@ class ActualizarFotoUsuario(Resource):
             # Validar si el usuario existe y esta validado
             usuarioId = dataValidada.get('usuarioId')
 
-            # SELECT id FROM usuarios WHERE id = '...' AND validado = true;
-            usuarioEncontrado = conexion.session.query(UsuarioModel).filter(
-                UsuarioModel.id == usuarioId, UsuarioModel.validado == True).with_entities(UsuarioModel.id).first()
+            sesionSQL = Session(conexion)
 
-            if not usuarioEncontrado:
+            # Aqui empezamos la transaccion
+            sesionSQL.begin()
+            try:
+                # SELECT id FROM usuarios WHERE id = '...' AND validado = true;
+                usuarioEncontrado = sesionSQL.query(UsuarioModel).filter(
+                    UsuarioModel.id == usuarioId, UsuarioModel.validado == True).with_entities(UsuarioModel.id).first()
+
+                if not usuarioEncontrado:
+                    return {
+                        'message': 'Usuario no existe'
+                    }, 400
+
+                # Antes de crear mi nueva imagen obtengo la anterior
+                fotosActuales = sesionSQL.query(MultimediaModel).filter(
+                    MultimediaModel.usuarioId == usuarioId).all()
+
+                if len(fotosActuales) > 0:
+                    for fotoActual in fotosActuales:
+                        # Eliminamos el registro de la base de datos
+                        sesionSQL.query(MultimediaModel).filter(
+                            MultimediaModel.usuarioId == usuarioId, MultimediaModel.id == fotoActual.id).delete()
+
+                        # Eliminamos la foto actual del usuario que tuviese
+                        uploader.destroy(fotoActual.folder+'/'+fotoActual.fileName,
+                                         cloud_name=environ.get('CLOUDINARY_NAME'))
+
+                # Crear un registro en la tabla multimedias y agregar el usuarioId
+                nuevaMultimedia = MultimediaModel(**dataValidada)
+                sesionSQL.add(nuevaMultimedia)
+
+                sesionSQL.commit()
+                resultado = serializer.dump(nuevaMultimedia)
+
                 return {
-                    'message': 'Usuario no existe'
-                }, 400
+                    'message': 'Foto actualizada exitosamente',
+                    'content': resultado
+                }, 201
 
-            # Crear un registro en la tabla multimedias y agregar el usuarioId
-            nuevaMultimedia = MultimediaModel(**dataValidada)
-            conexion.session.add(nuevaMultimedia)
-
-            conexion.session.commit()
-            resultado = serializer.dump(nuevaMultimedia)
-
-            return {
-                'message': 'Foto actualizada exitosamente',
-                'content': resultado
-            }, 201
+            except:
+                # si algun proceso ya sea de creacion del registro o eliminacion de registros anteriores o de eliminacion en cloudinary fallase haremos un rollback de todas las modificaciones en la bd
+                sesionSQL.rollback()
+                raise error(
+                    'Error al hacer las modificaciones en la base de datos')
 
         except ValidationError as error:
             return {
                 'message': 'Error al actualizar la foto del usuario',
                 'content': error.args
+            }, 400
+
+        except:
+            return {
+                'message': 'Error al actualizar la foto del usuario por motivos externos'
             }, 400
 
 

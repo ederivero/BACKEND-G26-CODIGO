@@ -42,7 +42,6 @@ const subirCloudinary = async (content) => {
     formData.append('api_key',content.apiKey)
     formData.append('timestamp',String(content.timestamp)) // El valor de timestamp tiene que ser un string
     formData.append('signature',content.signature)
-    // TODO: modificar esta propiedad para utilizar el public_id del backend en vez del nombre del archivo
     formData.append('public_id', content.public_id)
     formData.append('folder', folder)
 

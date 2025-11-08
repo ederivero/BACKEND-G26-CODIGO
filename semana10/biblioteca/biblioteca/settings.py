@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from os import environ
+from dotenv import load_dotenv
+from datetime import timedelta
+
+load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -37,6 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'gestion',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
@@ -76,6 +82,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'HOST': environ.get('POSTGRES_HOST'),
+        'NAME': environ.get('POSTGRES_NAME'),
+        'PASSWORD': environ.get('POSTGRES_PASSWORD'),
+        'PORT': environ.get('POSTGRES_PORT'),
+        'USER': environ.get('POSTGRES_USER')
     }
 }
 
@@ -102,7 +112,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es'
 
 TIME_ZONE = 'UTC'
 
@@ -120,3 +130,19 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Si queremos cambiar la referencia al modelo de auth_user por uno creado personalizado
+AUTH_USER_MODEL='gestion.Usuario'
+
+
+# Sirve para configurar todas las funcionabilidades de DJANGO REST FRAMEWORK en el proyecto
+REST_FRAMEWORK = {
+    # aca modificamos el comportamiento para las rutas autenticadas y le indicamos que la autenticacion sera ahora usando la clase JWTAuthentication
+    'DEFAULT_AUTHENTICATION_CLASSES':[ 'rest_framework_simplejwt.authentication.JWTAuthentication',],
+}
+
+# Sirve para modificar todas las configuraciones de mi JWT
+# https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1, minutes=10)
+}

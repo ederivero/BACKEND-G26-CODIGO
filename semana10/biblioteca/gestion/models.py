@@ -23,12 +23,20 @@ class ManejadorUsuario(BaseUserManager):
         # Guardamos el usuario en la bd
         nuevoUsuario.save()
 
+TIPO_USUARIO = [
+    ('1','ADMIN'),
+    ('2','USUARIO'),
+    ('3','PERSONAL')
+]
+
 class Usuario(AbstractBaseUser,PermissionsMixin):
     id = ULIDField(primary_key=True, default=default)
     nombre = models.TextField(null=False)
     apellido = models.TextField()
     correo = models.EmailField(unique=True, null=False)
     password = models.TextField(null=False)
+    # NOT NULL
+    tipoUsuario = models.TextField(db_column='tipo_usuario', choices=TIPO_USUARIO)
 
     # Ahora se agrega algunos otros elementos que son necesarios para el panel administrativo como 
     is_staff = models.BooleanField(default=False)
@@ -47,14 +55,14 @@ class Usuario(AbstractBaseUser,PermissionsMixin):
         db_table='usuarios'
 
 class Categoria(models.Model):
-    id = ULIDField(primary_key=True)
+    id = ULIDField(primary_key=True, default=default)
     nombre = models.TextField(unique=True)
 
     class Meta:
         db_table = 'categorias'
 
 class Libro(models.Model):
-    id = ULIDField(primary_key=True)
+    id = ULIDField(primary_key=True, default=default)
     nombre = models.TextField(null=False)
     autor = models.TextField(null=False)
     edicion = models.TextField(null=False)
@@ -72,7 +80,7 @@ class Libro(models.Model):
         db_table = 'libros'
 
 class Prestamo(models.Model):
-    id = ULIDField(primary_key=True, null=False)
+    id = ULIDField(primary_key=True, null=False, default=default)
     # related_name > es el atributo que se creara de manera virtual cuando quiera accdeder a mis prestamos desde mis libros, es decir, en la clase Libro se creara un atributo llamado 'prestamos' y asi yo podre ver todos los prestamos de un libro en especifico sin la necesidad de tener que hacer otra consulta
     libroId = models.ForeignKey(to=Libro, on_delete=models.PROTECT, db_column='libro_id', related_name='prestamos')
     usuarioId = models.ForeignKey(to=Usuario,on_delete=models.PROTECT, db_column='usuario_id', related_name='librosPrestadosUsuarios')

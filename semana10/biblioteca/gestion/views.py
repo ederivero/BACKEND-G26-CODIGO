@@ -30,8 +30,9 @@ def registro(request):
         correo = serializador.validated_data.get('correo')
         apellido = serializador.validated_data.get('apellido')
         password = serializador.validated_data.get('password')
+        tipoUsuario = serializador.validated_data.get('tipoUsuario')
 
-        nuevoUsuario = Usuario(nombre=nombre, correo=correo, apellido=apellido)
+        nuevoUsuario = Usuario(nombre=nombre, correo=correo, apellido=apellido, tipoUsuario = tipoUsuario)
         # generamos el hash de la password
         nuevoUsuario.set_password(password)
         nuevoUsuario.save()

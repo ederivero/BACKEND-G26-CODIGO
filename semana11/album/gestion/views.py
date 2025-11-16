@@ -171,4 +171,26 @@ class GestionArchivo(APIView):
         })
 
     def delete(self,request,id):
-        pass
+        archivoEncontrado = Archivo.objects.filter(id=id).first()
+
+        if not archivoEncontrado:
+            return Response(data={
+                'message':'Archivo no encontrado'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        archivoEncontrado.delete()
+
+        s3 = session.Session(
+            aws_access_key_id=environ.get('S3_ACCESS_KEY'),
+            aws_secret_access_key=environ.get('S3_SECRET_KEY'),
+            region_name=environ.get('S3_REGION')
+        ).client('s3')
+
+        s3.delete_object(
+            Bucket=environ.get('S3_BUCKET'),
+            Key=f"{archivoEncontrado.path if archivoEncontrado.path is not None else '' }{archivoEncontrado.key}.{archivoEncontrado.extension}"
+        )
+
+        return Response(data={
+            'message':'Archivo eliminado exitosamente'
+        })

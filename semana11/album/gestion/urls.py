@@ -1,7 +1,10 @@
 from django.urls import path
-from .views import GestionAlbumn, alternarAlbumEstado
+from .views import GestionAlbum, alternarAlbumEstado, GestionRecuerdo, crearRutaFirmadaArchivo, GestionArchivos
 
 urlpatterns = [
-    path('album', GestionAlbumn.as_view()),
+    path('album', GestionAlbum.as_view()),
     path('alternar-album-estado/<id>',alternarAlbumEstado),
-]
+    path('recuerdo', GestionRecuerdo.as_view()),
+    path('crear-url-firmada', crearRutaFirmadaArchivo),
+    path('archivos', GestionArchivos.as_view())
+]   
